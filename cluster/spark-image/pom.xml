@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>deps.spark</groupId>
+  <artifactId>spark</artifactId>
+  <version>4.0.2</version>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.apache.iceberg</groupId>
+      <artifactId>iceberg-spark-runtime-4.0_2.13</artifactId> 
+      <version>1.11.0</version>
+    </dependency>
+    <dependency>
+        <groupId>io.delta</groupId>
+        <artifactId>delta-spark_2.13</artifactId>
+        <version>4.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>io.delta</groupId>
+      <artifactId>delta-storage</artifactId>
+      <version>4.0.0</version>
+    </dependency>
+    <dependency>
+      <groupId>com.amazonaws</groupId>
+      <artifactId>aws-java-sdk-bundle</artifactId>
+      <version>1.12.555</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.hadoop</groupId>
+      <artifactId>hadoop-aws</artifactId>
+      <version>3.1.0</version>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <directory>lib</directory>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-dependency-plugin</artifactId>
+        <configuration>
+          <outputDirectory>
+            ${project.build.directory}
+          </outputDirectory>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+
+</project>

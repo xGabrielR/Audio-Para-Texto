@@ -1,0 +1,96 @@
+version: "3"
+
+services:
+
+  spark-master:
+    networks:
+      - simple_stack
+    image: my-spark:4.0.2
+    container_name: spark-master
+    hostname: spark-master
+    entrypoint: "/opt/spark/sbin/start-master.sh -p 7077"
+    environment:
+      SPARK_MODE: master
+      SPARK_USER: spark
+      SPARK_NO_DAEMONIZE: true # Keep container alive in Docker
+      SPARK_SSL_ENABLED: no
+      SPARK_RPC_ENCRYPTION_ENABLED: no
+      SPARK_RPC_AUTHENTICATION_ENABLED: no
+      SPARK_LOCAL_STORAGE_ENCRYPTION_ENABLED: no
+    ports:
+      - 8085:8080 # Spark Master
+      - 6066:6066 # Rest URL
+      - 8888:8888 # Jupyter Notebook no Driver
+    volumes:
+      - ./model:/tmp/model
+      - ./sample-audios:/tmp/sample-audios
+      - ./spark-jobs:/tmp/spark-jobs
+      - ./spark-events:/opt/spark/logs/events
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G
+
+  spark-history-server:
+    container_name: spark-history
+    image: my-spark:4.0.2
+    entrypoint: "/opt/spark/sbin/start-history-server.sh"
+    environment:
+      SPARK_NO_DAEMONIZE: true # Keep container alive in Docker
+      SPARK_HISTORY_UI_PORT: 18080
+      SPARK_HISTORY_FS_LOG_DIRECTORY: /opt/spark/logs/events
+      SPARK_HISTORY_OPTS: -Dspark.history.fs.logDirectory=/opt/spark/logs/events
+    depends_on:
+      - spark-master
+    volumes:
+      - ./spark-events:/opt/spark/logs/events
+    ports:
+      - 18080:18080
+
+
+
+  spark-worker-1:
+    networks:
+      - simple_stack
+    image: my-spark:4.0.2
+    entrypoint: "/opt/spark/sbin/start-worker.sh spark://spark-master:7077"
+    environment:
+      SPARK_MODE: worker
+      SPARK_NO_DAEMONIZE: true # Keep container alive in Docker
+    depends_on:
+      - spark-master
+    volumes:
+      - ./model:/tmp/model
+      - ./sample-audios:/tmp/sample-audios
+      - ./spark-jobs:/tmp/spark-jobs
+      - ./spark-events:/opt/spark/logs/events
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 8G
+
+  spark-worker-2:
+    networks:
+      - simple_stack
+    image: my-spark:4.0.2
+    entrypoint: "/opt/spark/sbin/start-worker.sh spark://spark-master:7077"
+    environment:
+      SPARK_MODE: worker
+      SPARK_NO_DAEMONIZE: true # Keep container alive in Docker
+    depends_on:
+      - spark-master
+    volumes:
+      - ./model:/tmp/model
+      - ./sample-audios:/tmp/sample-audios
+      - ./spark-jobs:/tmp/spark-jobs
+      - ./spark-events:/opt/spark/logs/events
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 8G
+
+networks:
+  simple_stack:
